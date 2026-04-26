@@ -1,5 +1,6 @@
 import Link from 'next/link';
 
+import { Countdown } from '@/components/countdown';
 import { RelativeTime } from '@/components/relative-time';
 import { StatusBadge } from '@/components/status-badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -19,8 +20,9 @@ export type RequestCardProps = {
 };
 
 export function RequestCard(props: RequestCardProps) {
-  const { id, amount_cents, memo, status, created_at, role, counterparty } = props;
+  const { id, amount_cents, memo, status, created_at, expires_at, role, counterparty } = props;
   const direction = role === 'sender' ? 'To' : 'From';
+  const isPending = status === 'pending';
   return (
     <Link href={`/requests/${id}`} className="block" data-slot="request-card" data-id={id}>
       <Card className="hover:bg-muted/40 transition">
@@ -48,7 +50,13 @@ export function RequestCard(props: RequestCardProps) {
             <p className="italic">No memo</p>
           )}
           <p className="mt-1 text-xs">
-            <RelativeTime iso={created_at} />
+            {isPending ? (
+              <>
+                Expires in <Countdown to={expires_at} />
+              </>
+            ) : (
+              <RelativeTime iso={created_at} />
+            )}
           </p>
         </CardContent>
       </Card>

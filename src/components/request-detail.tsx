@@ -1,4 +1,5 @@
 import { AbsoluteTime } from '@/components/absolute-time';
+import { Countdown } from '@/components/countdown';
 import { StatusBadge } from '@/components/status-badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { formatUSD } from '@/lib/money';
@@ -63,6 +64,17 @@ export function RequestDetail(props: RequestDetailProps) {
             </p>
           </div>
         </div>
+        {status === 'pending' && (
+          <div
+            className="bg-muted/30 rounded-md border px-3 py-2 text-xs"
+            data-slot="countdown-block"
+          >
+            <span className="text-muted-foreground">Time remaining: </span>
+            <span className="text-foreground font-medium">
+              <Countdown to={expires_at} />
+            </span>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
