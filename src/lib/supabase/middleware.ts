@@ -1,13 +1,16 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import type { User } from '@supabase/supabase-js';
 import { NextResponse, type NextRequest } from 'next/server';
 
 import { env } from '@/lib/env';
 import type { Database } from '@/types/database';
 
 // Refresh the Supabase auth session on every request.
-// Returns a NextResponse with up-to-date auth cookies attached.
+// Returns the response (with fresh auth cookies attached) and the current user.
 // Called by src/middleware.ts on the matching paths.
-export async function updateSession(request: NextRequest) {
+export async function updateSession(
+  request: NextRequest,
+): Promise<{ response: NextResponse; user: User | null }> {
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient<Database>(
@@ -30,7 +33,9 @@ export async function updateSession(request: NextRequest) {
   );
 
   // Touching getUser() refreshes the access-token cookie if it expired.
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  return response;
+  return { response, user };
 }
