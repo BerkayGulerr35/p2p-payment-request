@@ -52,6 +52,7 @@ export default async function DashboardPage() {
   }
 
   const outgoing = rows.filter((r) => r.sender_id === user.id);
+  const incoming = rows.filter((r) => r.recipient_id === user.id);
 
   function counterpartyOf(senderId: string, recipientId: string) {
     const otherId = senderId === user!.id ? recipientId : senderId;
@@ -72,6 +73,31 @@ export default async function DashboardPage() {
           New request
         </Link>
       </div>
+
+      <section className="space-y-3" data-slot="incoming-section">
+        <h2 className="text-muted-foreground text-sm font-medium">Incoming ({incoming.length})</h2>
+        {incoming.length === 0 ? (
+          <p className="bg-muted/30 text-muted-foreground rounded-md border p-4 text-sm">
+            You have not received any requests yet.
+          </p>
+        ) : (
+          <div className="grid gap-3" data-slot="incoming-list">
+            {incoming.map((r) => (
+              <RequestCard
+                key={r.id}
+                id={r.id}
+                amount_cents={r.amount_cents}
+                memo={r.memo}
+                status={r.status}
+                created_at={r.created_at}
+                expires_at={r.expires_at}
+                role="recipient"
+                counterparty={counterpartyOf(r.sender_id, r.recipient_id)}
+              />
+            ))}
+          </div>
+        )}
+      </section>
 
       <section className="space-y-3" data-slot="outgoing-section">
         <h2 className="text-muted-foreground text-sm font-medium">Outgoing ({outgoing.length})</h2>
