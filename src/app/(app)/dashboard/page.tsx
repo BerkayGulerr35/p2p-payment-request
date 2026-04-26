@@ -1,5 +1,6 @@
 import Link from 'next/link';
 
+import { FilterBar } from '@/components/filter-bar';
 import { RequestCard } from '@/components/request-card';
 import { buttonVariants } from '@/components/ui/button';
 import { createSupabaseServerClient } from '@/lib/supabase/ssr';
@@ -17,7 +18,15 @@ type RequestRow = {
 
 type UserRow = { id: string; display_name: string; email: string };
 
-export default async function DashboardPage() {
+type DashboardSearchParams = { status?: string; q?: string };
+
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<DashboardSearchParams>;
+}) {
+  const { status: statusParam, q: searchParam } = await searchParams;
+
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -51,9 +60,6 @@ export default async function DashboardPage() {
     userMap = new Map(fetched.map((u) => [u.id, u]));
   }
 
-  const outgoing = rows.filter((r) => r.sender_id === user.id);
-  const incoming = rows.filter((r) => r.recipient_id === user.id);
-
   function counterpartyOf(senderId: string, recipientId: string) {
     const otherId = senderId === user!.id ? recipientId : senderId;
     return (
@@ -65,6 +71,25 @@ export default async function DashboardPage() {
     );
   }
 
+  // Apply filters in JS so the search can match counterparty display names too.
+  const ql = searchParam?.toLowerCase().trim();
+  const hasFilter = Boolean((statusParam && statusParam !== 'all') || ql);
+
+  const filtered = rows.filter((r) => {
+    if (statusParam && statusParam !== 'all' && r.status !== statusParam) return false;
+    if (ql) {
+      const memoMatch = r.memo?.toLowerCase().includes(ql) ?? false;
+      const counterpartyId = r.sender_id === user.id ? r.recipient_id : r.sender_id;
+      const counterparty = userMap.get(counterpartyId);
+      const nameMatch = counterparty?.display_name?.toLowerCase().includes(ql) ?? false;
+      if (!memoMatch && !nameMatch) return false;
+    }
+    return true;
+  });
+
+  const outgoing = filtered.filter((r) => r.sender_id === user.id);
+  const incoming = filtered.filter((r) => r.recipient_id === user.id);
+
   return (
     <div className="space-y-6" data-slot="dashboard">
       <div className="flex items-center justify-between">
@@ -74,11 +99,15 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
+      <FilterBar />
+
       <section className="space-y-3" data-slot="incoming-section">
         <h2 className="text-muted-foreground text-sm font-medium">Incoming ({incoming.length})</h2>
         {incoming.length === 0 ? (
           <p className="bg-muted/30 text-muted-foreground rounded-md border p-4 text-sm">
-            You have not received any requests yet.
+            {hasFilter
+              ? 'No incoming requests match your filter.'
+              : 'You have not received any requests yet.'}
           </p>
         ) : (
           <div className="grid gap-3" data-slot="incoming-list">
@@ -103,7 +132,9 @@ export default async function DashboardPage() {
         <h2 className="text-muted-foreground text-sm font-medium">Outgoing ({outgoing.length})</h2>
         {outgoing.length === 0 ? (
           <p className="bg-muted/30 text-muted-foreground rounded-md border p-4 text-sm">
-            You have not sent any requests yet.
+            {hasFilter
+              ? 'No outgoing requests match your filter.'
+              : 'You have not sent any requests yet.'}
           </p>
         ) : (
           <div className="grid gap-3" data-slot="outgoing-list">

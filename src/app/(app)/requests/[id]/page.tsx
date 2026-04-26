@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
+import { CopyPublicLinkButton } from '@/components/copy-public-link-button';
 import { RequestActions } from '@/components/request-actions';
 import { RequestDetail } from '@/components/request-detail';
 import { buttonVariants } from '@/components/ui/button';
@@ -61,9 +62,12 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
     <div className="space-y-4" data-slot="detail-page">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">Request</h1>
-        <Link href="/dashboard" className={buttonVariants({ variant: 'ghost', size: 'sm' })}>
-          Back
-        </Link>
+        <div className="flex items-center gap-2">
+          <CopyPublicLinkButton publicId={request.public_id} />
+          <Link href="/dashboard" className={buttonVariants({ variant: 'ghost', size: 'sm' })}>
+            Back
+          </Link>
+        </div>
       </div>
 
       <RequestDetail
