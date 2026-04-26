@@ -3,8 +3,9 @@ import { z } from 'zod';
 const envSchema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
-  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1).optional(),
+  NEXT_PUBLIC_SITE_URL: z.string().url().optional(),
   NEXT_PUBLIC_DEV_LOGIN: z.enum(['0', '1']).default('0'),
+  SUPABASE_SECRET_KEY: z.string().min(1).optional(),
   PAYMENT_REQUEST_MAX_CENTS: z
     .string()
     .default('100000000')
