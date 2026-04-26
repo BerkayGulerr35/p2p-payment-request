@@ -60,9 +60,9 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
 
   return (
     <div className="space-y-4" data-slot="detail-page">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-xl font-semibold">Request</h1>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <CopyPublicLinkButton publicId={request.public_id} />
           <Link href="/dashboard" className={buttonVariants({ variant: 'ghost', size: 'sm' })}>
             Back
