@@ -22,10 +22,14 @@ export default function LoginPage() {
                 <span className="w-full border-t" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background text-muted-foreground px-2">Demo mode</span>
+                <span className="bg-background text-muted-foreground px-2">Demo accounts</span>
               </div>
             </div>
             <DevLoginButtons />
+            <p className="text-muted-foreground text-center text-xs">
+              These are throwaway evaluation accounts. Use either side to send and receive requests
+              against the other.
+            </p>
           </>
         )}
       </div>

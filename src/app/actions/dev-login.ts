@@ -16,13 +16,12 @@ function devPassword(persona: Persona): string {
   return `dev-${persona}-do-not-deploy-2026`;
 }
 
-// Dev-only Server Action that signs in as a seeded persona without an inbox round-trip.
-// Hard-blocked in production builds. Returns { ok } so the client can navigate
-// via the App Router (avoids NEXT_REDIRECT console noise from useTransition).
+// Demo-account Server Action that signs in as a seeded persona without an inbox round-trip.
+// Gated by `NEXT_PUBLIC_DEV_LOGIN`: the action returns 404 if the flag is not "1",
+// so deployments that omit the flag silently disable the route. Returns { ok }
+// so the client can navigate via the App Router (avoids NEXT_REDIRECT console
+// noise from useTransition).
 export async function devLoginAs(persona: Persona): Promise<{ ok: true }> {
-  if (process.env.NODE_ENV === 'production') {
-    notFound();
-  }
   if (process.env.NEXT_PUBLIC_DEV_LOGIN !== '1') {
     notFound();
   }
