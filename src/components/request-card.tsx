@@ -1,6 +1,6 @@
-import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
 
+import { RelativeTime } from '@/components/relative-time';
 import { StatusBadge } from '@/components/status-badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { formatUSD } from '@/lib/money';
@@ -48,7 +48,7 @@ export function RequestCard(props: RequestCardProps) {
             <p className="italic">No memo</p>
           )}
           <p className="mt-1 text-xs">
-            {formatDistanceToNow(new Date(created_at), { addSuffix: true })}
+            <RelativeTime iso={created_at} />
           </p>
         </CardContent>
       </Card>

@@ -1,6 +1,6 @@
 'use server';
 
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 
 import { createServiceRoleClient } from '@/lib/supabase/server';
 import { createSupabaseServerClient } from '@/lib/supabase/ssr';
@@ -17,9 +17,9 @@ function devPassword(persona: Persona): string {
 }
 
 // Dev-only Server Action that signs in as a seeded persona without an inbox round-trip.
-// Hard-blocked in production builds.
-// On the first call for each persona the user is created lazily via the admin API.
-export async function devLoginAs(persona: Persona): Promise<void> {
+// Hard-blocked in production builds. Returns { ok } so the client can navigate
+// via the App Router (avoids NEXT_REDIRECT console noise from useTransition).
+export async function devLoginAs(persona: Persona): Promise<{ ok: true }> {
   if (process.env.NODE_ENV === 'production') {
     notFound();
   }
@@ -59,5 +59,5 @@ export async function devLoginAs(persona: Persona): Promise<void> {
     }
   }
 
-  redirect('/dashboard');
+  return { ok: true };
 }

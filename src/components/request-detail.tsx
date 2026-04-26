@@ -1,5 +1,4 @@
-import { format } from 'date-fns';
-
+import { AbsoluteTime } from '@/components/absolute-time';
 import { StatusBadge } from '@/components/status-badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { formatUSD } from '@/lib/money';
@@ -53,11 +52,15 @@ export function RequestDetail(props: RequestDetailProps) {
         <div className="text-muted-foreground grid grid-cols-2 gap-4 text-xs">
           <div>
             <p className="tracking-wide uppercase">Created</p>
-            <p>{format(new Date(created_at), 'PPp')}</p>
+            <p>
+              <AbsoluteTime iso={created_at} />
+            </p>
           </div>
           <div>
             <p className="tracking-wide uppercase">Expires</p>
-            <p>{format(new Date(expires_at), 'PPp')}</p>
+            <p>
+              <AbsoluteTime iso={expires_at} />
+            </p>
           </div>
         </div>
       </CardContent>
