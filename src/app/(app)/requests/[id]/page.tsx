@@ -77,8 +77,13 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
         currentUserRole={isSender ? 'sender' : 'recipient'}
       />
 
-      {isPending && isRecipient && (
-        <RequestActions requestId={request.id} canPay={true} canDecline={true} />
+      {isPending && (isRecipient || isSender) && (
+        <RequestActions
+          requestId={request.id}
+          canPay={isRecipient}
+          canDecline={isRecipient}
+          canCancel={isSender}
+        />
       )}
     </div>
   );

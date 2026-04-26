@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
+import { cancelRequest } from '@/app/actions/cancel-request';
 import { declineRequest } from '@/app/actions/decline-request';
 import { payRequest } from '@/app/actions/pay-request';
 import { Button } from '@/components/ui/button';
@@ -19,34 +20,28 @@ type Props = {
   requestId: string;
   canPay: boolean;
   canDecline: boolean;
+  canCancel: boolean;
 };
 
-export function RequestActions({ requestId, canPay, canDecline }: Props) {
+export function RequestActions({ requestId, canPay, canDecline, canCancel }: Props) {
   const router = useRouter();
   const [pendingPay, startPay] = useTransition();
   const [pendingDecline, startDecline] = useTransition();
+  const [pendingCancel, startCancel] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  const anyPending = pendingPay || pendingDecline;
+  const anyPending = pendingPay || pendingDecline || pendingCancel;
 
-  function handlePay() {
+  function runAction(
+    label: string,
+    action: () => Promise<{ ok: true } | { error: string }>,
+    transition: (cb: () => void) => void,
+  ) {
     setError(null);
-    startPay(async () => {
-      const result = await payRequest({ request_id: requestId });
+    transition(async () => {
+      const result = await action();
       if ('error' in result) {
-        setError(ERROR_MESSAGES[result.error] ?? 'Something went wrong.');
-        return;
-      }
-      router.refresh();
-    });
-  }
-
-  function handleDecline() {
-    setError(null);
-    startDecline(async () => {
-      const result = await declineRequest({ request_id: requestId });
-      if ('error' in result) {
-        setError(ERROR_MESSAGES[result.error] ?? 'Something went wrong.');
+        setError(ERROR_MESSAGES[result.error] ?? `Could not ${label} the request.`);
         return;
       }
       router.refresh();
@@ -55,10 +50,10 @@ export function RequestActions({ requestId, canPay, canDecline }: Props) {
 
   return (
     <div className="space-y-3" data-slot="request-actions">
-      <div className="flex gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row">
         {canPay && (
           <Button
-            onClick={handlePay}
+            onClick={() => runAction('pay', () => payRequest({ request_id: requestId }), startPay)}
             disabled={anyPending}
             className="flex-1"
             data-slot="pay-button"
@@ -69,12 +64,27 @@ export function RequestActions({ requestId, canPay, canDecline }: Props) {
         {canDecline && (
           <Button
             variant="outline"
-            onClick={handleDecline}
+            onClick={() =>
+              runAction('decline', () => declineRequest({ request_id: requestId }), startDecline)
+            }
             disabled={anyPending}
             className="flex-1"
             data-slot="decline-button"
           >
             {pendingDecline ? 'Declining…' : 'Decline'}
+          </Button>
+        )}
+        {canCancel && (
+          <Button
+            variant="outline"
+            onClick={() =>
+              runAction('cancel', () => cancelRequest({ request_id: requestId }), startCancel)
+            }
+            disabled={anyPending}
+            className="flex-1"
+            data-slot="cancel-button"
+          >
+            {pendingCancel ? 'Cancelling…' : 'Cancel request'}
           </Button>
         )}
       </div>
